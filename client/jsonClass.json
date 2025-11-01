@@ -1,0 +1,18 @@
+{
+    "subjectName": "str",
+    "imageUrl": "str",
+    "courseName": "str",
+    "tags" : [
+        {
+            "tagName": "str",
+            "tagColor": "str"
+        }
+    ],
+    "info": [
+        {
+            "infoTitle": "str",
+            "infoDescription": "str",
+            "subInfo" : "info"
+        }
+    ]
+}
