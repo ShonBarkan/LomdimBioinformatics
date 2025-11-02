@@ -8,7 +8,7 @@ export const useAppContext = () => useContext(AppContext);
 const subjectsDefault= [
   {
     "subjectName": "ATP (אדנוזין טריפוספט)",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7f/ATP-structure.png",
+    "imageUrl": "./assets/the_cell.png",
     "courseName": "התא",
     "tags": [
         {
@@ -35,7 +35,23 @@ const subjectsDefault= [
                 },
                 {
                     "infoTitle": "תפקיד בתא",
-                    "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים."
+                    "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים.",
+                    "subInfo": [
+                        {
+                            "infoTitle": "תפקיד בתא",
+                            "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים.",
+                            "subInfo": [
+                                {
+                                    "infoTitle": "תפקיד בתא",
+                                    "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים."
+                                }
+                            ]
+                        },
+                        {
+                            "infoTitle": "שחרור אנרגיה",
+                            "infoDescription": "כאשר קשר בין קבוצות הפוספט נשבר, ATP הופך ל-ADP (Adenosine Diphosphate) או AMP (Adenosine Monophosphate), ותוך כדי כך משתחררת אנרגיה זמינה לשימוש מיידי."
+                        }
+                    ]
                 },
                 {
                     "infoTitle": "שחרור אנרגיה",
@@ -47,7 +63,7 @@ const subjectsDefault= [
   },
   {
     "subjectName": "מולקולה אמפיפתית (Amphipathic molecule)",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Phospholipid.svg",
+    "imageUrl": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.biologyonline.com%2Fdictionary%2Famphipathic&psig=AOvVaw0UHQ_eMcIeOpdPUeGx_W4k&ust=1762094473583000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJC_48-X0ZADFQAAAAAdAAAAABAE",
     "courseName": "התא",
     "tags": [
         {
