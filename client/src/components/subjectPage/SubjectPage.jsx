@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Info from './info/Info';
 import { useAppContext } from '../../context';
+import YouTubePlayer from './YouTubePlayer/YouTubePlayer';
+import AudioPlayer from '../AudioPlayer/AudioPlayer';
+import QuizComponent from '../QuizComponent/QuizComponent';
 
 const SubjectPage = () => {
   const { subjectName: urlSubjectName } = useParams();
@@ -31,7 +34,7 @@ const SubjectPage = () => {
     return null;
   }
 
-  const { subjectName, imageUrl, courseName, tags, info } = currentSubject;
+  const { subjectName, imageUrl, courseName, tags, info ,audioUrl, youTubeUrl, subjectTrivia} = currentSubject;
 
   return (
     <div className="space-y-8">
@@ -81,6 +84,11 @@ const SubjectPage = () => {
               <h1 className="text-3xl md:text-4xl font-bold mb-4">
                 {subjectName}
               </h1>
+              {/* AudioPlayer  */}
+              <div>
+                <p>פודקאסט (AI) בנושא <span className='font-bold'>"{subjectName}"</span></p>
+                <AudioPlayer audioUrl={audioUrl} />
+              </div>
               
               {/* Tags */}
               <div className="flex flex-wrap gap-2 justify-end">
@@ -102,6 +110,17 @@ const SubjectPage = () => {
         <div className="p-6 md:p-8">
           <Info info={info} titleFontSize={24} />
         </div>
+
+        {/* YouTubePlayer */}
+        <div className="p-6">
+          <h1 className="text-2xl mb-4">Watch this video</h1>
+          <YouTubePlayer youTubeUrl={youTubeUrl} />
+        </div>
+        {/* QuizComponent */}
+        {subjectTrivia&&(
+          <QuizComponent subjectTrivia={subjectTrivia} />
+        )}
+
       </div>
     </div>
   );

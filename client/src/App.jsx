@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import CardsPage from './components/subjectCards/CardsPage';
 import NotFoundPage from './components/NotFoundPage';
 import SubjectPage from './components/subjectPage/SubjectPage';
+import AddNewSubject from './components/AddNewSubject/AddNewSubject';
 
 const App = () => {
   const location = useLocation();
@@ -34,6 +35,16 @@ const App = () => {
                 }`}
               >
                 כרטיסיות נושאים
+              </Link>
+              <Link 
+                to="/AddNewSubject" 
+                className={`text-lg font-semibold transition-colors duration-200 ${
+                  location.pathname === '/AddNewSubject' 
+                    ? 'text-indigo-600 border-b-2 border-indigo-600' 
+                    : 'text-gray-700 hover:text-indigo-600'
+                }`}
+              >
+                הוסף נושא חדש
               </Link>
             </div>
             <div className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -67,6 +78,7 @@ const App = () => {
           />
           <Route path="/cards" element={<CardsPage />} />
           <Route path="/subjectPage/:subjectName" element={<SubjectPage />} />
+          <Route path="/AddNewSubject" element={<AddNewSubject />} />
           <Route path="/404" element={<NotFoundPage/>}/>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

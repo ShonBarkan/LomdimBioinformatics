@@ -2,6 +2,8 @@
     "subjectName": "str",
     "imageUrl": "str",
     "courseName": "str",
+    "youTubeUrl" : "str",
+    "audioUrl" : "str",
     "tags" : [
         {
             "tagName": "str",
@@ -13,6 +15,14 @@
             "infoTitle": "str",
             "infoDescription": "str",
             "subInfo" : "info"
+        }
+    ],
+    "subjectTrivia":[
+        {
+            "question": "str",
+            "answers": ["str * 4"],
+            "Correct answer": "str",
+            "explanation": "str"
         }
     ]
 }
