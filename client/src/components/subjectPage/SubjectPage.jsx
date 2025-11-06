@@ -5,36 +5,42 @@ import { useAppContext } from '../../context';
 import YouTubePlayer from './YouTubePlayer/YouTubePlayer';
 import AudioPlayer from '../AudioPlayer/AudioPlayer';
 import QuizComponent from '../QuizComponent/QuizComponent';
+import { getSubjectById } from '../../api/api';
 
 const SubjectPage = () => {
-  const { subjectName: urlSubjectName } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { currentSubject, subjects, setCurrentSubject, setNotFoundMessage } = useAppContext();
+  const { currentSubject, setCurrentSubject, setNotFoundMessage } = useAppContext();
 
   useEffect(() => {
-
-    // check if current subject matches the URL
-    if (currentSubject?.subjectName === urlSubjectName) return;
-
-    // try to find the subject by name
-    const foundSubject = subjects.find(
-      (s) => s.subjectName.toLowerCase() === urlSubjectName.toLowerCase()
-    );
-
-    if (foundSubject) {
-      setCurrentSubject(foundSubject);
-    } else {
-      // if not found, redirect to 404
-      setNotFoundMessage("Subject '" + urlSubjectName + "' not found.");
+    if (!id) {
+      setNotFoundMessage('Subject not found.');
       navigate('/404', { replace: true });
+      return;
     }
-  }, [urlSubjectName, subjects, currentSubject, setCurrentSubject, navigate]);
 
-  if (!currentSubject) {
-    return null;
-  }
+    const fetchSubject = async () => {
+      try {
+        const response = await getSubjectById(id);
+        if (response?.success && response.data) {
+          setCurrentSubject(response.data);
+        } else {
+          setNotFoundMessage(`Subject with id "${id}" not found.`);
+          navigate('/404', { replace: true });
+        }
+      } catch (error) {
+        setNotFoundMessage(`Error fetching subject with id "${id}".`);
+        navigate('/404', { replace: true });
+      }
+    };
 
-  const { subjectName, imageUrl, courseName, tags, info ,audioUrl, youTubeUrl, subjectTrivia} = currentSubject;
+    fetchSubject();
+  }, [id, navigate, setCurrentSubject, setNotFoundMessage]);
+
+
+  if (!currentSubject) return null;
+
+  const { subjectName, imageUrl, courseName, tags, info, audioUrl, youTubeUrl, subjectTrivia } = currentSubject;
 
   return (
     <div className="space-y-8">
@@ -84,7 +90,7 @@ const SubjectPage = () => {
               <h1 className="text-3xl md:text-4xl font-bold mb-4">
                 {subjectName}
               </h1>
-              {/* AudioPlayer  */}
+              {/* AudioPlayer */}
               <div>
                 <p>פודקאסט (AI) בנושא <span className='font-bold'>"{subjectName}"</span></p>
                 <AudioPlayer audioUrl={audioUrl} />
@@ -117,10 +123,9 @@ const SubjectPage = () => {
           <YouTubePlayer youTubeUrl={youTubeUrl} />
         </div>
         {/* QuizComponent */}
-        {subjectTrivia&&(
+        {subjectTrivia && (
           <QuizComponent subjectTrivia={subjectTrivia} />
         )}
-
       </div>
     </div>
   );

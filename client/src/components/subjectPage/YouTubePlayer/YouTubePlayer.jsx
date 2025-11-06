@@ -1,15 +1,27 @@
 import React from "react";
 
 const YouTubePlayer = ({ youTubeUrl, title = "YouTube video" }) => {
+  if (!youTubeUrl || typeof youTubeUrl !== "string") {
+    return null; // or render a friendly fallback message
+  }
+
   // Extract video ID from full URL or use directly if given
   const getVideoId = (url) => {
     const regExp =
       /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/;
     const match = url.match(regExp);
-    return match && match[1].length === 11 ? match[1] : url;
+    return match && match[1] && match[1].length === 11 ? match[1] : null;
   };
 
   const videoId = getVideoId(youTubeUrl);
+
+  if (!videoId) {
+    return (
+      <div className="text-gray-500 italic text-center py-4">
+        🎥 No valid YouTube video found for this subject.
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full overflow-hidden rounded-2xl shadow-md aspect-video">

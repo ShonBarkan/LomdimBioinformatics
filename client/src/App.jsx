@@ -77,7 +77,7 @@ const App = () => {
             } 
           />
           <Route path="/cards" element={<CardsPage />} />
-          <Route path="/subjectPage/:subjectName" element={<SubjectPage />} />
+          <Route path="/subjectPage/:subjectName/:id" element={<SubjectPage />} />
           <Route path="/AddNewSubject" element={<AddNewSubject />} />
           <Route path="/404" element={<NotFoundPage/>}/>
           <Route path="*" element={<NotFoundPage />} />

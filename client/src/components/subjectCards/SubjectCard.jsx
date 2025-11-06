@@ -8,7 +8,7 @@ const SubjectCard = ({subject}) => {
     const {subjectName , imageUrl ,courseName , tags } = subject
     const onSelectSubject = () => {
         setCurrentSubject(subject);
-        navigate(`/subjectPage/${subjectName}`);
+        navigate(`/subjectPage/${subjectName}/${subject._id}`);
     }
     
     return (

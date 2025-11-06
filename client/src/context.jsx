@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getDataForCards } from './api/api'
 // Create the context
 const AppContext = createContext();
 
@@ -315,6 +315,19 @@ export const AppProvider = ({ children }) => {
   const [subjects, setSubjects] = useState(subjectsDefault);
   const [currentSubject, setCurrentSubject] = useState(subjectsDefault[0]);
   const [notFoundMessage , setNotFoundMessage] = useState('');
+
+   useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const data = await getDataForCards();
+        setSubjects(data.data || []);
+      } catch (error) {
+        console.error('Failed to fetch subjects:', error);
+      }
+    };
+
+    fetchSubjects();
+  }, []);
 
   return (
     <AppContext.Provider value={
