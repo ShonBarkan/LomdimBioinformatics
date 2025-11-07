@@ -12,6 +12,7 @@ const SubjectPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentSubject, setCurrentSubject, setNotFoundMessage } = useAppContext();
+  const { user } = useUser();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {

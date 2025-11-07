@@ -77,6 +77,15 @@ const SubjectSchema = new Schema(
     tags: [TagSchema],
     info: [SubInfoSchema],
     subjectTrivia: [SubjectTriviaSchema],
+    createdBy: {
+      type: String,
+      required: true,
+      default: "unknown",
+    },
+    editedBy: [{
+      type: String,
+      default: "unknown",
+    }],
   },
   {
     timestamps: true,

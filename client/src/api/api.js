@@ -1,14 +1,55 @@
 import axios from 'axios';
 
-const SUBJECT_URL = 'http://localhost:3001/subjects';
+const BASE_URL = 'http://localhost:3001';
+const SUBJECT_URL = `${BASE_URL}/subjects`;
+const AUTH_URL = `${BASE_URL}/auth`;
 
-// Create an Axios instance with default settings
+// Create an Axios instance for subjects API
 const api = axios.create({
   baseURL: SUBJECT_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Create an Axios instance for auth API
+const authApi = axios.create({
+  baseURL: AUTH_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+/**
+ * Add JWT token to request headers if available
+ * This interceptor automatically includes the token in all API requests
+ */
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add the same interceptor to authApi for authenticated auth endpoints
+authApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export const getDataForCards = async ( params = {}) => {
   try {
@@ -55,5 +96,55 @@ export const updateSubject = async (id, data) => {
 
 
 
+
+// ==================== Authentication API ====================
+
+/**
+ * Register a new user
+ * @param {string} name - Username
+ * @param {string} password - User password
+ * @param {string} role - User role (optional, default: "student")
+ * @returns {Promise<Object>} - Response with token and user data
+ */
+export const register = async (name, password, role = 'student') => {
+  try {
+    const response = await authApi.post('/register', { name, password, role });
+    return response.data;
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+/**
+ * Login user
+ * @param {string} name - Username
+ * @param {string} password - User password
+ * @returns {Promise<Object>} - Response with token and user data
+ */
+export const login = async (name, password) => {
+  try {
+    const response = await authApi.post('/login', { name, password });
+    return response.data;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+/**
+ * Get current authenticated user information
+ * Requires valid JWT token
+ * @returns {Promise<Object>} - Response with user data
+ */
+export const getCurrentUser = async () => {
+  try {
+    const response = await authApi.get('/me');
+    return response.data;
+  } catch (error) {
+    console.error('Get current user error:', error);
+    throw error.response?.data || error.message;
+  }
+};
 
 export default api;

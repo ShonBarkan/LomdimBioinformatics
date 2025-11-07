@@ -8,6 +8,7 @@ import Logger from "./utils/logger.js";
 import fs from "fs";
 import swaggerUi from "swagger-ui-express";
 import subjectsRoute from "./routes/Subject.js";
+import authRoute from "./routes/auth.js";
 
 // Initialize Express app
 const app = express();
@@ -45,6 +46,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
+app.use('/auth', authRoute);
 app.use('/subjects', subjectsRoute);
 
 // Database connection
