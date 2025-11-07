@@ -139,27 +139,16 @@ export const UserProvider = ({ children }) => {
 
   /**
    * Register function
-   * Creates a new user account and stores JWT token
+   * Creates a new user account (admin only - does not log in as the new user)
+   * Admin creates users for others, so no token is returned
    */
   const register = async (name, password, role = 'student') => {
     try {
       const response = await registerApi(name, password, role);
 
-      if (response?.success && response.token) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.token);
-        setToken(response.token);
-
-        // Decode token and set user data
-        const decodedUser = decodeToken(response.token);
-        if (decodedUser) {
-          setUser(decodedUser);
-        } else if (response.user) {
-          // Fallback to user data from response if token decode fails
-          setUser(response.user);
-        }
-
-        return { success: true, user: decodedUser || response.user };
+      if (response?.success) {
+        // Registration successful - return user data (no token since admin creates for others)
+        return { success: true, user: response.user, message: response.message };
       } else {
         return { success: false, message: response.message || 'Registration failed' };
       }

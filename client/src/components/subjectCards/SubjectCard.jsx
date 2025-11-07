@@ -1,18 +1,35 @@
 import React from 'react';
 import { useAppContext } from '../../context';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../contexts/UserContext';
 
 const SubjectCard = ({subject}) => {
     const {setCurrentSubject} = useAppContext();
+    const { user } = useUser();
     const navigate = useNavigate();
     const {subjectName , imageUrl ,courseName , tags } = subject
+    
+    // Check if subject is learned
+    const isLearned = user && user.learnedSubjects && subject._id && 
+      user.learnedSubjects.some(learnedSubj => {
+        const learnedId = typeof learnedSubj === 'object' ? learnedSubj._id || learnedSubj : learnedSubj;
+        return learnedId === subject._id || learnedId?.toString() === subject._id?.toString();
+      });
+    
     const onSelectSubject = () => {
+        if (!user) {
+            // If user is not logged in, redirect to login
+            navigate('/login');
+            return;
+        }
         setCurrentSubject(subject);
         navigate(`/subjectPage/${subjectName}/${subject._id}`);
     }
     
     return (
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 border border-gray-100 flex flex-col">
+        <div className={`bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 flex flex-col ${
+          isLearned ? 'border-4 border-green-500' : 'border border-gray-100'
+        }`}>
             {/* Image Container */}
             <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100">
                 <img 

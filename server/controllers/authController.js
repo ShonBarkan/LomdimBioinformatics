@@ -95,14 +95,16 @@ export const login = async (req, res) => {
 
 /**
  * @route POST /auth/register
- * @desc Register a new user and return JWT token
+ * @desc Register a new user (admin only - does not return token, admin creates for others)
+ * @access Private (admin only)
  * @body {string} name - Username (must be unique)
  * @body {string} password - User password (min 6 characters)
  * @body {string} role - User role (optional, default: "student")
  */
 export const register = async (req, res) => {
   //#swagger.tags = ['Authentication']
-  //#swagger.summary = 'Register a new user and receive JWT token'
+  //#swagger.summary = 'Register a new user (admin only)'
+  //#swagger.security = [{"bearerAuth": []}]
 
   try {
     const { name, password, role } = req.body;
@@ -149,19 +151,15 @@ export const register = async (req, res) => {
     // Save user to database
     await user.save();
 
-    // Generate JWT token with user data
-    const token = generateToken(user);
-
     // Convert user to JSON (password will be excluded automatically)
     const userData = user.toJSON();
 
-    Logger.success([FILE_NAME], `User registered successfully: ${name}`);
+    Logger.success([FILE_NAME], `User ${name} registered successfully by admin ${req.user.name}`);
 
-    // Return token and user data
+    // Return user data (no token - admin is creating for someone else)
     res.status(201).json({
       success: true,
-      message: "Registration successful",
-      token,
+      message: "User registered successfully",
       user: userData,
     });
   } catch (error) {
@@ -194,7 +192,7 @@ export const getCurrentUser = async (req, res) => {
 
   try {
     // User is attached to request by auth middleware
-    const user = await User.findById(req.user.id).populate("courses");
+    const user = await User.findById(req.user.id).populate("learnedSubjects");
 
     if (!user) {
       return res.status(404).json({
@@ -210,6 +208,128 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (error) {
     Logger.error([FILE_NAME], `Get current user error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+/**
+ * @route POST /auth/mark-subject-done
+ * @desc Mark a subject as learned by adding it to user's learnedSubjects array
+ * @access Private (requires authentication)
+ * @body {string} subjectId - Subject ID to mark as done
+ */
+export const markSubjectDone = async (req, res) => {
+  //#swagger.tags = ['Authentication']
+  //#swagger.summary = 'Mark a subject as learned'
+  //#swagger.security = [{"bearerAuth": []}]
+
+  try {
+    const { subjectId } = req.body;
+
+    if (!subjectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject ID is required",
+      });
+    }
+
+    // User is attached to request by auth middleware
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if subject is already in learnedSubjects
+    if (user.learnedSubjects.includes(subjectId)) {
+      return res.status(200).json({
+        success: true,
+        message: "Subject already marked as done",
+        user: user.toJSON(),
+      });
+    }
+
+    // Add subject to learnedSubjects
+    user.learnedSubjects.push(subjectId);
+    await user.save();
+
+    Logger.success([FILE_NAME], `Subject ${subjectId} marked as done by ${user.name}`);
+    res.status(200).json({
+      success: true,
+      message: "Subject marked as done",
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    Logger.error([FILE_NAME], `Mark subject done error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+/**
+ * @route POST /auth/unmark-subject-done
+ * @desc Unmark a subject as learned by removing it from user's learnedSubjects array
+ * @access Private (requires authentication)
+ * @body {string} subjectId - Subject ID to unmark as done
+ */
+export const unmarkSubjectDone = async (req, res) => {
+  //#swagger.tags = ['Authentication']
+  //#swagger.summary = 'Unmark a subject as learned'
+  //#swagger.security = [{"bearerAuth": []}]
+
+  try {
+    const { subjectId } = req.body;
+
+    if (!subjectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject ID is required",
+      });
+    }
+
+    // User is attached to request by auth middleware
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if subject is in learnedSubjects
+    const subjectIndex = user.learnedSubjects.findIndex(
+      (id) => id.toString() === subjectId.toString()
+    );
+
+    if (subjectIndex === -1) {
+      return res.status(200).json({
+        success: true,
+        message: "Subject was not marked as done",
+        user: user.toJSON(),
+      });
+    }
+
+    // Remove subject from learnedSubjects
+    user.learnedSubjects.splice(subjectIndex, 1);
+    await user.save();
+
+    Logger.success([FILE_NAME], `Subject ${subjectId} unmarked as done by ${user.name}`);
+    res.status(200).json({
+      success: true,
+      message: "Subject unmarked as done",
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    Logger.error([FILE_NAME], `Unmark subject done error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: "Server error",

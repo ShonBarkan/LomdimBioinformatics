@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 
 /**
  * SignUp Component
- * Handles user registration
- * Redirects to intended page after successful registration
+ * Handles user registration (admin only)
+ * Admin creates new users without logging in as them
  */
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -13,13 +13,10 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('student');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useUser();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Get the page user was trying to access before signup (if any)
-  const from = location.state?.from?.pathname || '/';
 
   /**
    * Handle form submission
@@ -55,14 +52,24 @@ const SignUp = () => {
       const result = await register(name.trim(), password, role);
 
       if (result.success) {
-        // Registration successful, redirect to intended page or home
-        navigate(from, { replace: true });
+        // Registration successful - show success message and reset form
+        setSuccess(`משתמש ${name.trim()} נוצר בהצלחה!`);
+        setError('');
+        // Reset form
+        setName('');
+        setPassword('');
+        setConfirmPassword('');
+        setRole('student');
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
       } else {
         // Registration failed, show error
         setError(result.message || 'שגיאה בהרשמה. אנא נסה שוב.');
+        setSuccess('');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'שגיאה בהרשמה. אנא נסה שוב.');
+      setError(err.response?.data?.message || err.message || 'שגיאה בהרשמה. אנא נסה שוב.');
+      setSuccess('');
       console.error('Signup error:', err);
     } finally {
       setLoading(false);
@@ -75,9 +82,16 @@ const SignUp = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">הרשמה</h1>
-            <p className="text-gray-600">צור חשבון חדש כדי להתחיל</p>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">הוסף משתמש חדש</h1>
+            <p className="text-gray-600">צור חשבון חדש למשתמש</p>
           </div>
+
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-600 text-sm text-center">{success}</p>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -163,21 +177,18 @@ const SignUp = () => {
               disabled={loading}
               className="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]"
             >
-              {loading ? 'נרשם...' : 'הירשם'}
+              {loading ? 'יוצר משתמש...' : 'צור משתמש'}
             </button>
           </form>
 
-          {/* Login Link */}
+          {/* Back Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              כבר יש לך חשבון?{' '}
-              <Link
-                to="/login"
-                className="text-indigo-600 hover:text-indigo-700 font-semibold"
-              >
-                התחבר כאן
-              </Link>
-            </p>
+            <button
+              onClick={() => navigate('/')}
+              className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
+            >
+              חזור לדף הבית
+            </button>
           </div>
         </div>
       </div>

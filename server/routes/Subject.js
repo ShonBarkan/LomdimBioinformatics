@@ -7,6 +7,7 @@ import {
   getDocumentById,
 } from "../utils/dbUtils.js";
 import Logger from "../utils/logger.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 const FILE_NAME = "Subject";
@@ -65,21 +66,27 @@ router.get("/getDataForCards", async (req, res) => {
  *   { "subjectName": "אלקטרוכימיה", "courseName": "כימיה 2", "userId": "123" }
  * ]
  */
-router.post("/", async (req, res) => {
+router.post("/", authenticate, async (req, res) => {
   //#swagger.tags = ['Subject']
   //#swagger.summary = 'Add one or multiple Subject documents'
   try {
     const data = req.body;
+    const userName = req.user?.name || "unknown";
 
     if (!data || (Array.isArray(data) && data.length === 0)) {
       Logger.warn([FILE_NAME], "Empty request body");
       return res.status(400).json({ success: false, message: "Request body cannot be empty" });
     }
 
-    const count = Array.isArray(data) ? data.length : 1;
-    Logger.info([FILE_NAME], `Adding ${count} new ${FILE_NAME} document(s)`);
+    // Add createdBy field to each subject
+    const processedData = Array.isArray(data) 
+      ? data.map(item => ({ ...item, createdBy: userName }))
+      : { ...data, createdBy: userName };
 
-    const savedDocs = await addNewDocumentsToCollection(Subject, data);
+    const count = Array.isArray(processedData) ? processedData.length : 1;
+    Logger.info([FILE_NAME], `Adding ${count} new ${FILE_NAME} document(s) by ${userName}`);
+
+    const savedDocs = await addNewDocumentsToCollection(Subject, processedData);
     Logger.success([FILE_NAME], `Successfully added ${count} new ${FILE_NAME} document(s)`);
 
     res.status(201).json({
@@ -98,14 +105,30 @@ router.post("/", async (req, res) => {
  * @desc Update an existing Subject document
  * @body {Object} - Updated document data
  */
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticate, async (req, res) => {
   //#swagger.tags = ['Subject']
   //#swagger.summary = 'Update an existing Subject document'
   const { id } = req.params;
+  const userName = req.user?.name || "unknown";
 
   try {
-    Logger.info([FILE_NAME], `Updating ${FILE_NAME} document with ID: ${id}`);
-    const updatedDoc = await updateCollectionData(Subject, id, req.body);
+    Logger.info([FILE_NAME], `Updating ${FILE_NAME} document with ID: ${id} by ${userName}`);
+    
+    // Get the current subject to update editedBy array
+    const currentSubject = await Subject.findById(id);
+    if (!currentSubject) {
+      return res.status(404).json({ success: false, message: "Subject not found" });
+    }
+
+    // Add user to editedBy array if not already present
+    const editedBy = currentSubject.editedBy || [];
+    if (!editedBy.includes(userName)) {
+      editedBy.push(userName);
+    }
+
+    // Update the subject with editedBy
+    const updateData = { ...req.body, editedBy };
+    const updatedDoc = await updateCollectionData(Subject, id, updateData);
 
     Logger.success([FILE_NAME], `Updated ${FILE_NAME} document with ID: ${id}`);
     res.json({ success: true, data: updatedDoc });

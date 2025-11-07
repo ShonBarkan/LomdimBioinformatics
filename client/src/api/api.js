@@ -147,4 +147,36 @@ export const getCurrentUser = async () => {
   }
 };
 
+/**
+ * Mark a subject as done by adding it to user's learnedSubjects array
+ * Requires valid JWT token
+ * @param {string} subjectId - Subject ID to mark as done
+ * @returns {Promise<Object>} - Response with updated user data
+ */
+export const markSubjectDone = async (subjectId) => {
+  try {
+    const response = await authApi.post('/mark-subject-done', { subjectId });
+    return response.data;
+  } catch (error) {
+    console.error('Mark subject done error:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+/**
+ * Unmark a subject as done by removing it from user's learnedSubjects array
+ * Requires valid JWT token
+ * @param {string} subjectId - Subject ID to unmark as done
+ * @returns {Promise<Object>} - Response with updated user data
+ */
+export const unmarkSubjectDone = async (subjectId) => {
+  try {
+    const response = await authApi.post('/unmark-subject-done', { subjectId });
+    return response.data;
+  } catch (error) {
+    console.error('Unmark subject done error:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
 export default api;

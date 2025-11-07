@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useAppContext } from '../../context';
+import { useUser } from '../../contexts/UserContext';
 import SubjectCard from './SubjectCard';
 
 const CardsPage = () => {
   const { subjects } = useAppContext();
+  const { user } = useUser();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourses, setSelectedCourses] = useState([]);
+  const [learnedFilter, setLearnedFilter] = useState('all'); // 'all', 'learned', 'not-learned'
 
   // extract unique course names for filter options
   const courseNames = useMemo(() => {
@@ -23,6 +26,15 @@ const CardsPage = () => {
     );
   };
 
+  // Helper function to check if subject is learned
+  const isSubjectLearned = (subject) => {
+    if (!user || !user.learnedSubjects || !subject._id) return false;
+    return user.learnedSubjects.some(learnedSubj => {
+      const learnedId = typeof learnedSubj === 'object' ? learnedSubj._id || learnedSubj : learnedSubj;
+      return learnedId === subject._id || learnedId?.toString() === subject._id?.toString();
+    });
+  };
+
   // apply filters
   const filteredSubjects = useMemo(() => {
     return subjects.filter(subject => {
@@ -30,9 +42,18 @@ const CardsPage = () => {
         subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCourse =
         selectedCourses.length === 0 || selectedCourses.includes(subject.courseName);
-      return matchesName && matchesCourse;
+      
+      // Filter by learned status
+      let matchesLearned = true;
+      if (learnedFilter === 'learned') {
+        matchesLearned = isSubjectLearned(subject);
+      } else if (learnedFilter === 'not-learned') {
+        matchesLearned = !isSubjectLearned(subject);
+      }
+      
+      return matchesName && matchesCourse && matchesLearned;
     });
-  }, [subjects, searchTerm, selectedCourses]);
+  }, [subjects, searchTerm, selectedCourses, learnedFilter, user]);
 
   return (
     <div className="space-y-8">
@@ -74,7 +95,7 @@ const CardsPage = () => {
         </div>
 
         {/* Course Filter */}
-        <div>
+        <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-3">
             סנן לפי קורס
           </label>
@@ -98,8 +119,41 @@ const CardsPage = () => {
           </div>
         </div>
 
+        {/* Learned Filter */}
+        {user && (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              סנן לפי סטטוס למידה
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { value: 'all', label: 'הכל' },
+                { value: 'learned', label: 'נלמד' },
+                { value: 'not-learned', label: 'לא נלמד' }
+              ].map(option => (
+                <label 
+                  key={option.value}
+                  className="flex items-center gap-2 cursor-pointer group"
+                >
+                  <input
+                    type="radio"
+                    name="learnedFilter"
+                    value={option.value}
+                    checked={learnedFilter === option.value}
+                    onChange={(e) => setLearnedFilter(e.target.value)}
+                    className="w-5 h-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 focus:ring-2 cursor-pointer transition-all"
+                  />
+                  <span className="text-gray-700 font-medium group-hover:text-indigo-600 transition-colors duration-200">
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Active Filters Info */}
-        {(searchTerm || selectedCourses.length > 0) && (
+        {(searchTerm || selectedCourses.length > 0 || learnedFilter !== 'all') && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-sm text-gray-600">
@@ -109,6 +163,7 @@ const CardsPage = () => {
                 onClick={() => {
                   setSearchTerm('');
                   setSelectedCourses([]);
+                  setLearnedFilter('all');
                 }}
                 className="text-sm text-indigo-600 hover:text-indigo-800 font-medium underline"
               >

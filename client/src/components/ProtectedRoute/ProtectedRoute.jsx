@@ -9,8 +9,10 @@ import { useUser } from '../../contexts/UserContext';
  * 
  * @param {React.Component} children - The component to render if authenticated
  * @param {string|string[]} allowedRoles - Optional: specific roles allowed to access this route
+ * @param {boolean} allowUnauthenticated - Optional: allow unauthenticated users (default: false)
+ * @param {string|string[]} blockRoles - Optional: specific roles blocked from accessing this route
  */
-const ProtectedRoute = ({ children, allowedRoles = null }) => {
+const ProtectedRoute = ({ children, allowedRoles = null, allowUnauthenticated = false, blockRoles = null }) => {
   const { isAuthenticated, user, loading } = useUser();
   const location = useLocation();
 
@@ -26,11 +28,50 @@ const ProtectedRoute = ({ children, allowedRoles = null }) => {
     );
   }
 
-  // Check if user is authenticated
-  if (!isAuthenticated()) {
+  const isAuth = isAuthenticated();
+
+  // If route allows unauthenticated users, check blockRoles
+  if (allowUnauthenticated) {
+    // If user is authenticated and their role is blocked, redirect
+    if (isAuth && blockRoles) {
+      const blocked = Array.isArray(blockRoles) ? blockRoles : [blockRoles];
+      if (user && blocked.includes(user.role)) {
+        // Redirect authenticated users with blocked roles to home
+        return <Navigate to="/" replace />;
+      }
+    }
+    // Allow access (either unauthenticated or authenticated with allowed role)
+    return children;
+  }
+
+  // Check if user is authenticated (for routes that require authentication)
+  if (!isAuth) {
     // Redirect to login page, saving the current location
     // This allows redirecting back after successful login
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Check if user's role is blocked
+  if (blockRoles) {
+    const blocked = Array.isArray(blockRoles) ? blockRoles : [blockRoles];
+    if (user && blocked.includes(user.role)) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" dir="rtl">
+          <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">גישה נדחתה</h2>
+            <p className="text-gray-600 mb-6">
+              אין לך הרשאה לגשת לדף זה.
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all"
+            >
+              חזור
+            </button>
+          </div>
+        </div>
+      );
+    }
   }
 
   // Check role-based access if specified

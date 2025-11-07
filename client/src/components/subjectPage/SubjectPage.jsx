@@ -2,18 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Info from './info/Info';
 import { useAppContext } from '../../context';
+import { useUser } from '../../contexts/UserContext';
 import YouTubePlayer from './YouTubePlayer/YouTubePlayer';
 import AudioPlayer from '../AudioPlayer/AudioPlayer';
 import QuizComponent from '../QuizComponent/QuizComponent';
-import { getSubjectById } from '../../api/api';
+import { getSubjectById, markSubjectDone, unmarkSubjectDone } from '../../api/api';
 import EditSubjectModal from './EditSubjectModal/EditSubjectModal';
 
 const SubjectPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentSubject, setCurrentSubject, setNotFoundMessage } = useAppContext();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isMarkingDone, setIsMarkingDone] = useState(false);
+  const [isSubjectDone, setIsSubjectDone] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -40,9 +43,47 @@ const SubjectPage = () => {
     fetchSubject();
   }, [id, navigate, setCurrentSubject, setNotFoundMessage]);
 
+  // Check if subject is already marked as done
+  useEffect(() => {
+    if (user && currentSubject?._id) {
+      const learnedSubjectIds = user.learnedSubjects?.map(subj => 
+        typeof subj === 'object' ? subj._id || subj : subj
+      ) || [];
+      setIsSubjectDone(learnedSubjectIds.includes(currentSubject._id));
+    }
+  }, [user, currentSubject]);
+
+  const handleMarkAsDone = async () => {
+    if (!user || !currentSubject?._id) return;
+    
+    try {
+      setIsMarkingDone(true);
+      if (isSubjectDone) {
+        // Unmark as done
+        const response = await unmarkSubjectDone(currentSubject._id);
+        if (response?.success && response.user) {
+          setUser(response.user);
+          setIsSubjectDone(false);
+        }
+      } else {
+        // Mark as done
+        const response = await markSubjectDone(currentSubject._id);
+        if (response?.success && response.user) {
+          setUser(response.user);
+          setIsSubjectDone(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling subject done status:', error);
+      alert(isSubjectDone ? 'שגיאה בביטול סימון הנושא' : 'שגיאה בסימון הנושא כהושלם');
+    } finally {
+      setIsMarkingDone(false);
+    }
+  };
+
   if (!currentSubject) return null;
 
-  const { subjectName, imageUrl, courseName, tags, info, audioUrl, youTubeUrl, subjectTrivia } = currentSubject;
+  const { subjectName, imageUrl, courseName, tags, info, audioUrl, youTubeUrl, subjectTrivia, createdBy, editedBy } = currentSubject;
 
   return (
     <div className="space-y-8">
@@ -57,14 +98,17 @@ const SubjectPage = () => {
       </button>
 
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        {/* header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white relative">
-          {/* ✏️ Edit button */}
-          <button
-            onClick={() => setIsEditOpen(true)}
-            className="absolute top-6 left-6 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm transition"
-          >
-            Edit
-          </button>
+          {/* ✏️ Edit button - Only for admin and teacher */}
+          {(user?.role === 'admin' || user?.role === 'teacher') && (
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="absolute top-6 left-6 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm transition"
+            >
+              Edit
+            </button>
+          )}
 
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
             <div className="flex-shrink-0">
@@ -74,10 +118,23 @@ const SubjectPage = () => {
             </div>
 
             <div className="flex-grow text-right">
-              <div className="mb-3">
+              <div className="mb-3 flex items-center gap-3 justify-end flex-wrap">
                 <span className="inline-block px-4 py-2 text-sm font-semibold bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
                   {courseName}
                 </span>
+                {user && (
+                  <button
+                    onClick={handleMarkAsDone}
+                    disabled={isMarkingDone}
+                    className={`px-4 py-2 text-sm font-semibold rounded-full border transition ${
+                      isSubjectDone
+                        ? 'bg-green-500/30 hover:bg-green-500/40 border-green-300 text-white'
+                        : 'bg-white/20 hover:bg-white/30 border-white/30 text-white'
+                    }`}
+                  >
+                    {isMarkingDone ? 'מעבד...' : isSubjectDone ? '✓ הושלם (לחץ לביטול)' : 'סמן כהושלם'}
+                  </button>
+                )}
               </div>
               <h1 className="text-3xl md:text-4xl font-bold mb-4">{subjectName}</h1>
               <div>
@@ -85,26 +142,40 @@ const SubjectPage = () => {
                 <AudioPlayer audioUrl={audioUrl} />
               </div>
 
-              <div className="flex flex-wrap gap-2 justify-end">
+              <div className="flex flex-wrap gap-2 justify-end mt-4">
                 {tags.map((tag, index) => (
                   <span key={index} className="px-4 py-2 text-sm font-medium rounded-full bg-white/20 backdrop-blur-sm border border-white/30" style={{ backgroundColor: `${tag.tagColor}30`, borderColor: `${tag.tagColor}60` }}>
                     {tag.tagName}
                   </span>
                 ))}
               </div>
+
+              {/* Created and Edited By Info */}
+              <div className="mt-4 pt-4 border-t border-white/20 text-sm text-white/80">
+                {createdBy && (
+                  <p className="mb-1">
+                    נוצר על ידי: <span className="font-semibold">{createdBy}</span>
+                  </p>
+                )}
+                {editedBy && editedBy.length > 0 && (
+                  <p>
+                    נערך על ידי: <span className="font-semibold">{editedBy.join(', ')}</span>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
-
+        {/* Info */}
         <div className="p-6 md:p-8">
           <Info info={info} titleFontSize={24} />
         </div>
-
+        {/* YouTube Video */}
         <div className="p-6">
           <h1 className="text-2xl mb-4">Watch this video</h1>
           <YouTubePlayer youTubeUrl={youTubeUrl} />
         </div>
-
+        {/* Quiz */}
         {subjectTrivia && <QuizComponent subjectTrivia={subjectTrivia} />}
       </div>
 
