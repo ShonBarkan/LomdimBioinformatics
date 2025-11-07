@@ -31,5 +31,17 @@ export const getSubjectById = async (id, fields = []) => {
   }
 };
 
+export const addSubject = async (data) => {
+  try {
+    const response = await api.post('/', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding subject:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+
+
 
 export default api;
