@@ -21,7 +21,7 @@
         {
             "question": "str",
             "answers": ["str * 4"],
-            "Correct answer": "str",
+            "correctAnswer": "str",
             "explanation": "str"
         }
     ]

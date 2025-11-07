@@ -41,6 +41,18 @@ export const addSubject = async (data) => {
   }
 };
 
+export const updateSubject = async (id, data) => {
+  try {
+    const response = await api.put(`/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating subject with id ${id}:`, error);
+    throw error.response?.data || error.message;
+  }
+};
+
+
+
 
 
 
