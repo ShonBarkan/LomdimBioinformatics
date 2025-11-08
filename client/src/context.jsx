@@ -7,102 +7,6 @@ const AppContext = createContext();
 export const useAppContext = () => useContext(AppContext);
 const subjectsDefault= [
   {
-    "subjectName": "ATP (אדנוזין טריפוספט)",
-    "imageUrl": "./assets/the_cell.png",
-    "courseName": "התא",
-    "youTubeUrl":"",
-    "tags": [
-        {
-            "tagName": "אנרגיה בתא",
-            "tagColor": "green"
-        },
-        {
-            "tagName": "מטבוליזם",
-            "tagColor": "blue"
-        },
-        {
-            "tagName": "נוקלאוטידים",
-            "tagColor": "orange"
-        }
-    ],
-    "info": [
-        {
-            "infoTitle": "מהו ATP",
-            "infoDescription": "ATP (Adenosine Triphosphate – אדנוזין טריפוספט) הוא מולקולה המכילה בסיס אדנין, סוכר ריבוז ושלוש קבוצות פוספט. הוא מהווה את מקור האנרגיה המרכזי בתא.",
-            "subInfo": [
-                {
-                    "infoTitle": "מבנה המולקולה",
-                    "infoDescription": "המולקולה מורכבת מבסיס חנקני (Adenine), סוכר (Ribose) ושלוש קבוצות פוספט (Triphosphate). הקשרים בין קבוצות הפוספט עשירים באנרגיה."
-                },
-                {
-                    "infoTitle": "תפקיד בתא",
-                    "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים.",
-                    "subInfo": [
-                        {
-                            "infoTitle": "תפקיד בתא",
-                            "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים.",
-                            "subInfo": [
-                                {
-                                    "infoTitle": "תפקיד בתא",
-                                    "infoDescription": "ATP מספק אנרגיה לתהליכים תאיים כמו סינתזת חלבונים, העברת חומרים דרך ממברנות והתכווצות שרירים."
-                                }
-                            ]
-                        },
-                        {
-                            "infoTitle": "שחרור אנרגיה",
-                            "infoDescription": "כאשר קשר בין קבוצות הפוספט נשבר, ATP הופך ל-ADP (Adenosine Diphosphate) או AMP (Adenosine Monophosphate), ותוך כדי כך משתחררת אנרגיה זמינה לשימוש מיידי."
-                        }
-                    ]
-                },
-                {
-                    "infoTitle": "שחרור אנרגיה",
-                    "infoDescription": "כאשר קשר בין קבוצות הפוספט נשבר, ATP הופך ל-ADP (Adenosine Diphosphate) או AMP (Adenosine Monophosphate), ותוך כדי כך משתחררת אנרגיה זמינה לשימוש מיידי."
-                }
-            ]
-        }
-    ]
-  },
-  {
-    "subjectName": "מולקולה אמפיפתית (Amphipathic molecule)",
-    "imageUrl": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.biologyonline.com%2Fdictionary%2Famphipathic&psig=AOvVaw0UHQ_eMcIeOpdPUeGx_W4k&ust=1762094473583000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJC_48-X0ZADFQAAAAAdAAAAABAE",
-    "courseName": "התא",
-    "youTubeUrl": "" ,
-    "tags": [
-        {
-            "tagName": "מבנה מולקולרי",
-            "tagColor": "blue"
-        },
-        {
-            "tagName": "הידרופובי והידרופילי",
-            "tagColor": "teal"
-        },
-        {
-            "tagName": "ממברנות ביולוגיות",
-            "tagColor": "purple"
-        }
-    ],
-    "info": [
-        {
-            "infoTitle": "מהי מולקולה אמפיפתית",
-            "infoDescription": "מולקולה אמפיפתית (Amphipathic) היא מולקולה שיש בה גם אזורים הידרופוביים (שאינם מסיסים במים) וגם אזורים הידרופיליים (נמשכים למים).",
-            "subInfo": [
-                {
-                    "infoTitle": "החלק ההידרופילי",
-                    "infoDescription": "החלק ההידרופילי הוא הקצה הפולרי של המולקולה, אשר נמשך למים ויכול ליצור קשרים עם מולקולות מים או יונים טעונים."
-                },
-                {
-                    "infoTitle": "החלק ההידרופובי",
-                    "infoDescription": "החלק ההידרופובי הוא קצה שאינו מסיס במים, לרוב מורכב מזנבות פחמימניים ארוכים שאינם יוצרים קשרים עם מים."
-                },
-                {
-                    "infoTitle": "דוגמה ביולוגית",
-                    "infoDescription": "פוספוליפידים (Phospholipids), המרכיבים העיקריים של קרומי התא, הם מולקולות אמפיפתיות. הם יוצרים מבנה דו-שכבתי שבו החלקים ההידרופוביים פונים פנימה וההידרופיליים פונים החוצה אל הסביבה המימית."
-                }
-            ]
-        }
-    ]
-  },
-  {
 "subjectName": "סטויכיומטריה",
 "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Stoichiometry_diagram.png",
 "courseName": "מבוא לכימיה כללית ואנליטית",
@@ -305,9 +209,6 @@ const subjectsDefault= [
     }
 ]
   }
-
-
-
 ]
 // Provider component
 export const AppProvider = ({ children }) => {
