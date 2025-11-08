@@ -21,7 +21,7 @@ const QuizComponent = ({ subjectTrivia }) => {
   }, [subjectTrivia]);
 
     const handleAnswer = (questionIndex, answer, correctAnswer) => {
-    if (answers[questionIndex]?.isCorrect) return; // Only prevent if correct answer was given
+    if (answers[questionIndex]?.isCorrect) return; // Only prevent if correctAnswer was given
     const isCorrect = answer === correctAnswer;
     setAnswers((prev) => ({
         ...prev,
@@ -57,7 +57,7 @@ const QuizComponent = ({ subjectTrivia }) => {
           >
             <p className="text-lg font-medium mb-4">{q.question}</p>
             
-            {/* Show explanation after correct answer */}
+            {/* Show explanation after correctAnswer */}
             {userAnswer?.isCorrect && (
               <p className="text-green-600 mb-4 p-3 bg-green-50 rounded">
                 {q.explanation}
@@ -67,7 +67,7 @@ const QuizComponent = ({ subjectTrivia }) => {
             <Space direction="vertical" className="w-full">
                 {q.shuffledAnswers.map((ans, i) => {
                 const selected = userAnswer?.selected === ans;
-                const isThisCorrect = q["Correct answer"] === ans;
+                const isThisCorrect = q["correctAnswer"] === ans;
 
                 let btnClass =
                     "w-full text-right rounded-lg font-medium transition-all";
@@ -80,8 +80,8 @@ const QuizComponent = ({ subjectTrivia }) => {
                 return (
                     <Button
                     key={i}
-                    onClick={() => handleAnswer(index, ans, q["Correct answer"])}
-                    disabled={selected || userAnswer?.isCorrect} // Only disable if this answer was selected or correct answer found
+                    onClick={() => handleAnswer(index, ans, q["correctAnswer"])}
+                    disabled={selected || userAnswer?.isCorrect} // Only disable if this answer was selected or correctAnswer found
                     className={btnClass}
                     icon={
                         selected ? (
