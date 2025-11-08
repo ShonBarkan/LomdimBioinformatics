@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { Input, Card, Space, Tooltip, Button, message } from "antd";
+import { Input, Card, Space, Tooltip, Button, message, Divider, Alert } from "antd";
 import { CopyOutlined, InfoCircleOutlined, CheckOutlined } from '@ant-design/icons';
 import subjectJsonClass from '../../../../jsonClass.json'
 const subjectClass = subjectJsonClass; // Import the JSON structure
@@ -106,64 +106,93 @@ const BuildPrompt = () => {
     ];
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: 24, gap: 24 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "16px", gap: 24, width: "100%", maxWidth: "100%" }}>
             {/* Inputs */}
-            <Card title="בניית הנחיה (Prompt Builder)" style={{ width: "100%", maxWidth: 700 }}>
-                <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            <Card title="בניית הנחיה (Prompt Builder)" style={{ width: "100%", maxWidth: 700, margin: "0 auto" }}>
+                <Space direction="vertical" size="large" style={{ width: "100%" }}>
                     {inputsConfig.map(input => (
-                        <div key={input.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ display: "block", marginBottom: 4, fontWeight: 500, direction: 'rtl', textAlign: 'right' }}>{input.label}</label>
+                        <div key={input.name} style={{ display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                <label style={{ display: "block", marginBottom: 8, fontWeight: 500, direction: 'rtl', textAlign: 'right' }}>
+                                    {input.label}
+                                </label>
                                 <Input
                                     name={input.name}
                                     placeholder={input.placeholder}
                                     onChange={handleChange}
-                                    dir="rtl" // Set input direction to RTL
+                                    dir="rtl"
+                                    size="large"
                                 />
                             </div>
                             <Tooltip title={input.tooltip}>
-                                <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 18, marginTop: '20px' }} />
+                                <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 18, marginTop: '32px', cursor: 'help', flexShrink: 0 }} />
                             </Tooltip>
                         </div>
                     ))}
                 </Space>
             </Card>
 
-            ---
+            <Divider style={{ margin: '24px 0', width: '100%', maxWidth: 700, minWidth: 0 }} />
 
             {/* Prompt Preview */}
             <Card
-                title="תצוגה מקדימה של ההנחיה"
+                title={
+                    <div style={{ direction: 'rtl', textAlign: 'right' }}>
+                        <div style={{ fontWeight: 600, marginBottom: 8 }}>תצוגה מקדימה של ההנחיה</div>
+                        <div style={{ fontSize: 13, fontWeight: 400, color: '#666', lineHeight: 1.6 }}>
+                            הדבק את הפרומפט הזה בכלי AI לבחירתך. את התוצאה תדביק למטה. 
+                            <br />
+                            שים לב: הכנס רק את ה-JSON שקיבלת, ודא שהחומר שהכנסת הוא הגיוני.
+                        </div>
+                    </div>
+                }
                 style={{
                     width: "100%",
                     maxWidth: 700,
-                    position: "relative", // Needed for absolute positioning of the icon
+                    position: "relative",
+                    margin: "0 auto",
                 }}
-            >
-                <div 
-                    ref={promptRef} // Attach the ref here
-                    style={{
-                        fontFamily: "monospace",
-                        fontSize: 14,
-                        whiteSpace: "pre-wrap",
-                        textAlign: "left", // Keep content alignment to left for code/prompt structure
-                        paddingRight: '30px' // Make space for the icon
-                    }}
-                >
-                    {/* Copy Icon - FIX: Use state for conditional rendering */}
+                extra={
                     <Tooltip title={copied ? "הועתק!" : "העתק הנחיה"}>
                         {copied ? (
                             <CheckOutlined 
-                                style={{ position: "absolute", top: 16, right: 16, fontSize: 20, color: "green" }}
+                                style={{ fontSize: 20, color: "#52c41a", cursor: 'pointer' }}
                             />
                         ) : (
                             <CopyOutlined
                                 onClick={copyPrompt}
-                                style={{ position: "absolute", top: 16, right: 16, fontSize: 20, cursor: "pointer", color: "#1890ff" }}
+                                style={{ fontSize: 20, cursor: "pointer", color: "#1890ff" }}
                             />
                         )}
                     </Tooltip>
-                    {/* Display the full prompt text */}
+                }
+            >
+                <Alert
+                    message="הנחיות חשובות"
+                    description="לאחר שתעתיק את ההנחיה לכלי AI, ודא שהתשובה מכילה רק JSON תקף ללא טקסט נוסף."
+                    type="info"
+                    showIcon
+                    closable
+                    style={{ marginBottom: 16, direction: 'rtl', textAlign: 'right' }}
+                />
+                <div 
+                    ref={promptRef}
+                    style={{
+                        fontFamily: "monospace",
+                        fontSize: "12px",
+                        whiteSpace: "pre-wrap",
+                        textAlign: "left",
+                        padding: '12px',
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 6,
+                        border: '1px solid #e8e8e8',
+                        maxHeight: '500px',
+                        overflowY: 'auto',
+                        overflowX: 'auto',
+                        lineHeight: 1.6,
+                        wordBreak: "break-word"
+                    }}
+                >
                     {fullPromptText}
                 </div>
             </Card>

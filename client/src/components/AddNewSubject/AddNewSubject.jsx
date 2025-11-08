@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import BuildPrompt from './BuildPrompt/BuildPrompt';
-import { Button, Card, Input, Space, Tooltip, message } from 'antd';
+import { Button, Card, Input, Space, Tooltip, message, Alert, Divider } from 'antd';
 import {addSubject} from '../../api/api';
 import { useAppContext } from '../../context';
 import { InfoCircleOutlined } from '@ant-design/icons';
@@ -48,38 +48,82 @@ const AddNewSubject = () => {
     }
     };
     return (
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "16px", gap: 24, width: "100%", maxWidth: "100%" }}>
             <BuildPrompt />
-                        ---
             
+            <Divider style={{ margin: '24px 0', width: '100%', maxWidth: 700, minWidth: 0 }} />
+
             {/* Add Subject Scope */}
             <Card
                 title="הוספת נושא (JSON)"
-                style={{ width: "100%", maxWidth: 700 }}
+                style={{ width: "100%", maxWidth: 700, margin: "0 auto" }}
             >
-                <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                    <Input.TextArea
-                        rows={8}
-                        placeholder='הדבק כאן את אובייקט ה-JSON שנוצר על ידי ה-LLM...'
-                        value={jsonInput}
-                        onChange={(e) => {
-                            setJsonInput(e.target.value);
-                            setJsonError(''); // Clear error on change
-                        }}
-                        style={{ fontFamily: 'monospace', direction: 'ltr' }}
-                    />
-                    {jsonError && <p style={{ color: 'red', margin: 0, direction: 'rtl' }}>{jsonError}</p>}
+                <Space direction="vertical" size="large" style={{ width: "100%" }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: 8, fontWeight: 500, direction: 'rtl', textAlign: 'right' }}>
+                            הדבק את אובייקט ה-JSON כאן
+                        </label>
+                        <Input.TextArea
+                            rows={10}
+                            placeholder='הדבק כאן את אובייקט ה-JSON שנוצר על ידי ה-LLM...'
+                            value={jsonInput}
+                            onChange={(e) => {
+                                setJsonInput(e.target.value);
+                                setJsonError(''); // Clear error on change
+                            }}
+                            style={{ 
+                                fontFamily: 'monospace', 
+                                direction: 'ltr',
+                                fontSize: "12px",
+                                wordBreak: "break-word",
+                                overflowWrap: "break-word"
+                            }}
+                        />
+                    </div>
+                    
+                    {jsonError && (
+                        <Alert
+                            message="שגיאה"
+                            description={jsonError}
+                            type="error"
+                            showIcon
+                            closable
+                            onClose={() => setJsonError('')}
+                            style={{ direction: 'rtl', textAlign: 'right' }}
+                        />
+                    )}
+                    
                     <Button
                         type="primary"
                         onClick={handleAddSubject}
-                        style={{ width: '100%' }}
+                        size="large"
+                        block
+                        style={{ 
+                            height: 48,
+                            fontSize: 16,
+                            fontWeight: 500
+                        }}
                     >
                         הוסף נושא
                     </Button>
-                    <Tooltip title="פונקציה זו מאפשרת להוסיף JSON שנוצר ידנית או באמצעות ה-Prompt למערך ה-subjects הכללי.">
-                        <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 14 }} />
-                        <span style={{ marginRight: 8 }}>איך זה עובד?</span>
-                    </Tooltip>
+                    
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 8, 
+                        justifyContent: 'center',
+                        padding: '12px',
+                        backgroundColor: '#f0f7ff',
+                        borderRadius: 6,
+                        direction: 'rtl'
+                    }}>
+                        <Tooltip title="פונקציה זו מאפשרת להוסיף JSON שנוצר ידנית או באמצעות ה-Prompt למערך ה-subjects הכללי.">
+                            <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 16, cursor: 'help' }} />
+                        </Tooltip>
+                        <span style={{ color: '#1890ff', fontSize: 14, fontWeight: 500 }}>
+                            איך זה עובד?
+                        </span>
+                    </div>
                 </Space>
             </Card>
         </div>

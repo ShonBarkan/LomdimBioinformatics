@@ -56,21 +56,21 @@ const CardsPage = () => {
   }, [subjects, searchTerm, selectedCourses, learnedFilter, user]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8 w-full">
       {/* Page Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-3">
+      <div className="text-center mb-4 sm:mb-8 px-2">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-2 sm:mb-3">
           כרטיסיות נושאים
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-base sm:text-lg text-gray-600">
           גלה ולמד נושאים מעניינים בביו-אינפורמטיקה
         </p>
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 border border-gray-100">
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 mb-4 sm:mb-8 border border-gray-100 w-full">
         {/* Search Input */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             חיפוש לפי שם נושא
           </label>
@@ -80,7 +80,7 @@ const CardsPage = () => {
               placeholder="חפש נושא..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 text-right"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 sm:pr-12 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all duration-200 text-right text-sm sm:text-base"
               dir="rtl"
             />
             <svg 
@@ -95,11 +95,11 @@ const CardsPage = () => {
         </div>
 
         {/* Course Filter */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+        <div className="mb-4 sm:mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
             סנן לפי קורס
           </label>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {courseNames.map(courseName => (
               <label 
                 key={courseName} 
@@ -122,10 +122,10 @@ const CardsPage = () => {
         {/* Learned Filter */}
         {user && (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">
               סנן לפי סטטוס למידה
             </label>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {[
                 { value: 'all', label: 'הכל' },
                 { value: 'learned', label: 'נלמד' },
@@ -176,7 +176,7 @@ const CardsPage = () => {
 
       {/* Subject Cards Grid */}
       {filteredSubjects.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full">
           {filteredSubjects.map((subject, index) => (
             <SubjectCard key={index} subject={subject} />
           ))}
