@@ -256,6 +256,11 @@ const App = () => {
             path="/" 
             element={
               <div className="text-center py-8 sm:py-12 md:py-20 px-4 w-full">
+                <img
+                  src="/assets/icon.png"
+                  alt="לוגו הפלטפורמה"
+                  className="mx-auto mb-6 w-24 sm:w-32 md:w-40"
+                />
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4 sm:mb-6">
                   ברוכים הבאים!
                 </h1>
