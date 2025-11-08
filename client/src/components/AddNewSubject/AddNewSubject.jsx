@@ -1,63 +1,59 @@
 import React, { useState } from 'react';
 import BuildPrompt from './BuildPrompt/BuildPrompt';
-import { Button, Card, Input, Space, Tooltip, message, Alert, Divider } from 'antd';
-import {addSubject} from '../../api/api';
+import { Button, Card, Input, Space, Tooltip, message, Alert, Divider, Spin } from 'antd';
+import { addSubject } from '../../api/api';
 import { useAppContext } from '../../context';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
 const AddNewSubject = () => {
 
     const { setSubjects } = useAppContext();
-    // State for the new "Add Subject" textarea and error
     const [jsonInput, setJsonInput] = useState('');
     const [jsonError, setJsonError] = useState('');
+    const [loading, setLoading] = useState(false);
     
     const handleAddSubject = async () => {
-    setJsonError(''); // Clear previous error
-
-    if (!jsonInput.trim()) {
-        setJsonError("אנא הזן טקסט."); // Please enter text.
-        return;
-    }
-
-    try {
-        const parsedJson = JSON.parse(jsonInput);
-
-        // Basic structural validation
-        if (typeof parsedJson !== 'object' || parsedJson === null || Array.isArray(parsedJson)) {
-        throw new Error("הטקסט שהוזן אינו אובייקט JSON תקף."); // The entered text is not a valid JSON object.
+        setJsonError('');
+        
+        if (!jsonInput.trim()) {
+            setJsonError("אנא הזן טקסט.");
+            return;
         }
 
-        // 🔹 Call the API to save the subject
-        const response = await addSubject(parsedJson);
+        try {
+            setLoading(true); // 🔹 Start loader
+            const parsedJson = JSON.parse(jsonInput);
 
-        // 🔹 Optionally validate API response
-        if (response?.success) {
-        // Update local state
-        setSubjects((prevSubjects) => [...prevSubjects, response.data || parsedJson]);
-        message.success("נושא חדש נוסף בהצלחה!"); // New subject added successfully!
-        setJsonInput(''); // Clear the input field
-        } else {
-        throw new Error(response?.message || "שגיאה בהוספת הנושא לשרת."); // Error adding subject to server.
+            if (typeof parsedJson !== 'object' || parsedJson === null || Array.isArray(parsedJson)) {
+                throw new Error("הטקסט שהוזן אינו אובייקט JSON תקף.");
+            }
+
+            const response = await addSubject(parsedJson);
+
+            if (response?.success) {
+                setSubjects((prevSubjects) => [...prevSubjects, response.data || parsedJson]);
+                message.success("נושא חדש נוסף בהצלחה!");
+                setJsonInput('');
+            } else {
+                throw new Error(response?.message || "שגיאה בהוספת הנושא לשרת.");
+            }
+
+        } catch (error) {
+            console.error("Error adding subject:", error);
+            setJsonError("שגיאת JSON או שרת: " + error.message);
+            message.error("הוספת הנושא נכשלה. בדוק את פורמט ה-JSON או את השרת.");
+        } finally {
+            setLoading(false); // 🔹 Stop loader
         }
-
-    } catch (error) {
-        console.error("Error adding subject:", error);
-        setJsonError("שגיאת JSON או שרת: " + error.message); // JSON or server error
-        message.error("הוספת הנושא נכשלה. בדוק את פורמט ה-JSON או את השרת."); // Failed to add subject. Check JSON or server.
-    }
     };
+    
     return (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "16px", gap: 24, width: "100%", maxWidth: "100%" }}>
             <BuildPrompt />
             
             <Divider style={{ margin: '24px 0', width: '100%', maxWidth: 700, minWidth: 0 }} />
 
-            {/* Add Subject Scope */}
-            <Card
-                title="הוספת נושא (JSON)"
-                style={{ width: "100%", maxWidth: 700, margin: "0 auto" }}
-            >
+            <Card title="הוספת נושא (JSON)" style={{ width: "100%", maxWidth: 700, margin: "0 auto" }}>
                 <Space direction="vertical" size="large" style={{ width: "100%" }}>
                     <div>
                         <label style={{ display: 'block', marginBottom: 8, fontWeight: 500, direction: 'rtl', textAlign: 'right' }}>
@@ -69,10 +65,10 @@ const AddNewSubject = () => {
                             value={jsonInput}
                             onChange={(e) => {
                                 setJsonInput(e.target.value);
-                                setJsonError(''); // Clear error on change
+                                setJsonError('');
                             }}
-                            style={{ 
-                                fontFamily: 'monospace', 
+                            style={{
+                                fontFamily: 'monospace',
                                 direction: 'ltr',
                                 fontSize: "12px",
                                 wordBreak: "break-word",
@@ -98,13 +94,15 @@ const AddNewSubject = () => {
                         onClick={handleAddSubject}
                         size="large"
                         block
+                        loading={loading} // 🔹 Loader indicator on button
+                        disabled={loading}
                         style={{ 
                             height: 48,
                             fontSize: 16,
                             fontWeight: 500
                         }}
                     >
-                        הוסף נושא
+                        {loading ? "מוסיף נושא..." : "הוסף נושא"} {/* 🔹 Optional text change */}
                     </Button>
                     
                     <div style={{ 

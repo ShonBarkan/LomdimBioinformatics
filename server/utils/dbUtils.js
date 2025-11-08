@@ -134,3 +134,42 @@ export const getDocumentById = async (Model, id, fields = []) => {
   }
 };
 
+/**
+ * Check if a value already exists in a given field within a collection.
+ * @param {mongoose.Model} Model - The Mongoose model to query.
+ * @param {string} field - The field name to check.
+ * @param {*} value - The value to search for.
+ * @returns {Promise<boolean>} - True if value exists, false otherwise.
+ */
+export const checkIfValueExistsInCollection = async (Model, field, value) => {
+  try {
+    if (!field || typeof field !== "string") {
+      Logger.warn([FILE_NAME], "Invalid or missing field name for existence check");
+      throw new Error("Field name must be a non-empty string");
+    }
+
+    Logger.info(
+      [FILE_NAME],
+      `Checking if value "${value}" exists in field "${field}" of ${Model.collection.name}`
+    );
+
+    const exists = await Model.exists({ [field]: value });
+
+    if (exists) {
+      Logger.success(
+        [FILE_NAME],
+        `Value "${value}" already exists in field "${field}" of ${Model.collection.name}`
+      );
+      return true;
+    }
+
+    Logger.info(
+      [FILE_NAME],
+      `Value "${value}" does not exist in field "${field}" of ${Model.collection.name}`
+    );
+    return false;
+  } catch (error) {
+    Logger.error([FILE_NAME], `Error checking value existence: ${error.message}`);
+    throw error;
+  }
+};

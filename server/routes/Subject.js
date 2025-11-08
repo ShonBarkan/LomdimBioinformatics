@@ -5,6 +5,7 @@ import {
   addNewDocumentsToCollection,
   updateCollectionData,
   getDocumentById,
+  checkIfValueExistsInCollection,
 } from "../utils/dbUtils.js";
 import Logger from "../utils/logger.js";
 import { authenticate } from "../middleware/auth.js";
@@ -75,23 +76,58 @@ router.post("/", authenticate, async (req, res) => {
 
     if (!data || (Array.isArray(data) && data.length === 0)) {
       Logger.warn([FILE_NAME], "Empty request body");
-      return res.status(400).json({ success: false, message: "Request body cannot be empty" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Request body cannot be empty" });
     }
 
-    // Add createdBy field to each subject
-    const processedData = Array.isArray(data) 
-      ? data.map(item => ({ ...item, createdBy: userName }))
-      : { ...data, createdBy: userName };
+    // Normalize to array for easier handling
+    const subjectsArray = Array.isArray(data) ? data : [data];
 
-    const count = Array.isArray(processedData) ? processedData.length : 1;
-    Logger.info([FILE_NAME], `Adding ${count} new ${FILE_NAME} document(s) by ${userName}`);
+    // Check for existing courseName before inserting
+    for (const subject of subjectsArray) {
+      if (!subject.courseName) {
+        throw new Error("Each subject must include a courseName field");
+      }
+
+      const exists = await checkIfValueExistsInCollection(
+        Subject,
+        "subjectName",
+        subject.subjectName
+      );
+
+      if (exists) {
+        Logger.warn(
+          [FILE_NAME],
+          `Attempted to add duplicate subjectName: ${subject.subjectName}`
+        );
+        throw new Error(
+          `Subject with subjectName "${subject.subjectName}" already exists`
+        );
+      }
+    }
+
+    // Add createdBy field
+    const processedData = subjectsArray.map((item) => ({
+      ...item,
+      createdBy: userName,
+    }));
+
+    Logger.info(
+      [FILE_NAME],
+      `Adding ${processedData.length} new ${FILE_NAME} document(s) by ${userName}`
+    );
 
     const savedDocs = await addNewDocumentsToCollection(Subject, processedData);
-    Logger.success([FILE_NAME], `Successfully added ${count} new ${FILE_NAME} document(s)`);
+
+    Logger.success(
+      [FILE_NAME],
+      `Successfully added ${processedData.length} new ${FILE_NAME} document(s)`
+    );
 
     res.status(201).json({
       success: true,
-      count,
+      count: processedData.length,
       data: savedDocs,
     });
   } catch (error) {
