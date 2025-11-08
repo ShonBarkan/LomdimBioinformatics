@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../../context';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
@@ -8,6 +8,7 @@ const SubjectCard = ({subject}) => {
     const { user } = useUser();
     const navigate = useNavigate();
     const {subjectName , imageUrl ,courseName , tags } = subject
+    const [imageError, setImageError] = useState(false);
     
     // Check if subject is learned
     const isLearned = user && user.learnedSubjects && subject._id && 
@@ -33,12 +34,10 @@ const SubjectCard = ({subject}) => {
             {/* Image Container */}
             <div className="relative h-48 sm:h-56 overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100">
                 <img 
-                    src={imageUrl} 
+                    src={imageError ? `/assets/${courseName}.png` : imageUrl} 
                     alt={subjectName}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                    onError={(e) => {
-                        e.target.style.display = 'none';
-                    }}
+                    onError={() => setImageError(true)}
                 />
             </div>
             

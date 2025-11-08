@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { Input, Card, Space, Tooltip, Button, message, Divider, Alert } from "antd";
+import { Input, Card, Space, Tooltip, Button, message, Divider, Alert, Select, InputNumber } from "antd";
 import { CopyOutlined, InfoCircleOutlined, CheckOutlined } from '@ant-design/icons';
 import subjectJsonClass from '../../../../jsonClass.json'
 const subjectClass = subjectJsonClass; // Import the JSON structure
@@ -23,9 +23,16 @@ const BuildPrompt = () => {
     });
 
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setPromptData(prev => ({ ...prev, [name]: value }));
+    const handleChange = (nameOrEvent, value) => {
+        // Handle both event objects (from Input) and direct values (from Select/InputNumber)
+        if (typeof nameOrEvent === 'object' && nameOrEvent.target) {
+            // Regular input event
+            const { name: inputName, value: inputValue } = nameOrEvent.target;
+            setPromptData(prev => ({ ...prev, [inputName]: inputValue || "__" }));
+        } else {
+            // Direct value from Select or InputNumber
+            setPromptData(prev => ({ ...prev, [nameOrEvent]: value !== null && value !== undefined ? value : "__" }));
+        }
     };
 
     // Calculate the full prompt string based on state
@@ -95,14 +102,14 @@ const BuildPrompt = () => {
     };
 
     const inputsConfig = [
-        { name: "subjectName", label: "שם הנושא", placeholder: "הזן את שם הנושא", tooltip: "שם הנושא כפי שירצה המשתמש" },
-        { name: "courseName", label: "שם הקורס", placeholder: "הזן את שם הקורס", tooltip: "שם הקורס אותו המשתמש לוקח" },
-        { name: "imageUrl", label: "כתובת תמונה", placeholder: "הזן כתובת URL לתמונה", tooltip: "כתובת תמונה של הנושא (אם יש)" },
-        { name: "youTubeUrl", label: "קישור ליוטיוב", placeholder: "הזן קישור ל-YouTube", tooltip: "קישור לסרטון יוטיוב בנושא (אם יש)" },
-        { name: "audioUrl", label: "קישור לאודיו", placeholder: "הזן קישור לאודיו", tooltip: "קישור לקובץ אודיו בנושא (אם יש)" },
-        { name: "wordsPerParagraph", label: "מילים בכל פסקה", placeholder: "כמה מילים יהיו בכל פסקה?", tooltip: "לבחור כמה מילים בממוצע יהיה בכל פסקה כמה זמן המשתמש רוצה להסביר את החומר" },
-        { name: "subInfo", label: "נושא משנה", placeholder: "הזן נושא משנה מרכזי", tooltip: "נושא משנה מרכזי שהמשתמש רוצה לכלול" },
-        { name: "numberOfQuestions", label: "מספר שאלות", placeholder: "מספר שאלות ל-Quiz (אופציונלי)", tooltip: "מספר שאלות ל-Quiz (אופציונלי)" },
+        { name: "subjectName", label: "שם הנושא", placeholder: "הזן את שם הנושא", tooltip: "שם הנושא כפי שירצה המשתמש", type: "text" },
+        { name: "courseName", label: "שם הקורס", placeholder: "בחר שם קורס", tooltip: "שם הקורס אותו המשתמש לוקח", type: "select", options: ["מבוא למדעי המחשב-JAVA","מבוא לכימיה כללית ואנליטית","לוגיקה","התא"] },
+        { name: "imageUrl", label: "כתובת תמונה", placeholder: "הזן כתובת URL לתמונה", tooltip: "כתובת תמונה של הנושא (אם יש)", type: "text" },
+        { name: "youTubeUrl", label: "קישור ליוטיוב", placeholder: "הזן קישור ל-YouTube", tooltip: "קישור לסרטון יוטיוב בנושא (אם יש)", type: "text" },
+        { name: "audioUrl", label: "קישור לאודיו", placeholder: "הזן קישור לאודיו", tooltip: "קישור לקובץ אודיו בנושא (אם יש)", type: "text" },
+        { name: "wordsPerParagraph", label: "מילים בכל פסקה", placeholder: "כמה מילים יהיו בכל פסקה?", tooltip: "לבחור כמה מילים בממוצע יהיה בכל פסקה כמה זמן המשתמש רוצה להסביר את החומר", type: "number" },
+        { name: "subInfo", label: "נושא משנה", placeholder: "הזן נושא משנה מרכזי", tooltip: "נושא משנה מרכזי שהמשתמש רוצה לכלול", type: "text" },
+        { name: "numberOfQuestions", label: "מספר שאלות", placeholder: "מספר שאלות ל-Quiz (אופציונלי)", tooltip: "מספר שאלות ל-Quiz (אופציונלי)", type: "number" },
     ];
 
     return (
@@ -110,25 +117,59 @@ const BuildPrompt = () => {
             {/* Inputs */}
             <Card title="בניית הנחיה (Prompt Builder)" style={{ width: "100%", maxWidth: 700, margin: "0 auto" }}>
                 <Space direction="vertical" size="large" style={{ width: "100%" }}>
-                    {inputsConfig.map(input => (
-                        <div key={input.name} style={{ display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
-                            <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
-                                <label style={{ display: "block", marginBottom: 8, fontWeight: 500, direction: 'rtl', textAlign: 'right' }}>
-                                    {input.label}
-                                </label>
-                                <Input
-                                    name={input.name}
-                                    placeholder={input.placeholder}
-                                    onChange={handleChange}
-                                    dir="rtl"
-                                    size="large"
-                                />
+                    {inputsConfig.map(input => {
+                        const inputType = input.type || "text";
+                        const inputValue = promptData[input.name] === "__" ? undefined : promptData[input.name];
+                        
+                        return (
+                            <div key={input.name} style={{ display: "flex", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                                <div style={{ flex: "1 1 200px", minWidth: "200px" }}>
+                                    <label style={{ display: "block", marginBottom: 8, fontWeight: 500, direction: 'rtl', textAlign: 'right' }}>
+                                        {input.label}
+                                    </label>
+                                    {inputType === "select" ? (
+                                        <Select
+                                            name={input.name}
+                                            placeholder={input.placeholder}
+                                            onChange={(value) => handleChange(input.name, value)}
+                                            dir="rtl"
+                                            size="large"
+                                            style={{ width: "100%" }}
+                                            value={inputValue}
+                                            options={input.options?.map(opt => 
+                                                typeof opt === 'string' 
+                                                    ? { label: opt, value: opt }
+                                                    : opt
+                                            )}
+                                        />
+                                    ) : inputType === "number" ? (
+                                        <InputNumber
+                                            name={input.name}
+                                            placeholder={input.placeholder}
+                                            onChange={(value) => handleChange(input.name, value)}
+                                            dir="rtl"
+                                            size="large"
+                                            style={{ width: "100%" }}
+                                            value={inputValue}
+                                        />
+                                    ) : (
+                                        <Input
+                                            name={input.name}
+                                            placeholder={input.placeholder}
+                                            onChange={handleChange}
+                                            dir="rtl"
+                                            size="large"
+                                            value={inputValue}
+                                            type={inputType}
+                                        />
+                                    )}
+                                </div>
+                                <Tooltip title={input.tooltip}>
+                                    <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 18, marginTop: '32px', cursor: 'help', flexShrink: 0 }} />
+                                </Tooltip>
                             </div>
-                            <Tooltip title={input.tooltip}>
-                                <InfoCircleOutlined style={{ color: '#1890ff', fontSize: 18, marginTop: '32px', cursor: 'help', flexShrink: 0 }} />
-                            </Tooltip>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </Space>
             </Card>
 

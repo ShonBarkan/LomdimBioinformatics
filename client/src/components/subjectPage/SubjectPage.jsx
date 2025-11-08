@@ -17,6 +17,7 @@ const SubjectPage = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isMarkingDone, setIsMarkingDone] = useState(false);
   const [isSubjectDone, setIsSubjectDone] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -30,6 +31,7 @@ const SubjectPage = () => {
         const response = await getSubjectById(id);
         if (response?.success && response.data) {
           setCurrentSubject(response.data);
+          setImageError(false); // Reset image error when subject changes
         } else {
           setNotFoundMessage(`Subject with id "${id}" not found.`);
           navigate('/404', { replace: true });
@@ -111,17 +113,23 @@ const SubjectPage = () => {
           )}
 
           <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start md:items-center mt-8 sm:mt-0">
-            <div className="flex-shrink-0 mx-auto md:mx-0">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-xl overflow-hidden bg-white shadow-lg border-4 border-white/20">
-                <img src={imageUrl} alt={subjectName} className="w-full h-full object-cover" />
+            <div className="flex-shrink-0 mx-auto md:mx-0 flex flex-col items-center">
+              {/* Image */}
+              <div className="w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-xl overflow-hidden bg-white shadow-lg border-4 border-white/20">
+                <img
+                  src={imageError ? `/assets/${courseName}.png` : imageUrl}
+                  alt={subjectName}
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
+                />
               </div>
-            </div>
 
-            <div className="flex-grow text-right w-full">
-              <div className="mb-3 flex items-center gap-2 sm:gap-3 justify-end flex-wrap">
+              {/* Buttons and tags */}
+              <div className="mt-4 mb-3 flex items-center gap-2 sm:gap-3 justify-center flex-wrap">
                 <span className="inline-block px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-semibold bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
                   {courseName}
                 </span>
+
                 {user && (
                   <button
                     onClick={handleMarkAsDone}
@@ -136,18 +144,22 @@ const SubjectPage = () => {
                   </button>
                 )}
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 break-words">{subjectName}</h1>
-              <div className="mb-3 sm:mb-0">
-                <p className="text-sm sm:text-base mb-2">פודקאסט (AI) בנושא <span className='font-bold'>"{subjectName}"</span></p>
-                <AudioPlayer audioUrl={audioUrl} />
-              </div>
+            </div>
 
-              <div className="flex flex-wrap gap-2 justify-end mt-3 sm:mt-4">
+
+            <div className="flex-grow text-right w-full">
+
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 break-words">{subjectName}</h1>
+              <div className="flex flex-wrap gap-2 justify m-3 sm:mt-4">
                 {tags.map((tag, index) => (
                   <span key={index} className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium rounded-full bg-white/20 backdrop-blur-sm border border-white/30" style={{ backgroundColor: `${tag.tagColor}30`, borderColor: `${tag.tagColor}60` }}>
                     {tag.tagName}
                   </span>
                 ))}
+              </div>
+              <div className="mb-3 sm:mb-0">
+                <p className="text-sm sm:text-base mb-2">פודקאסט (AI) בנושא <span className='font-bold'>"{subjectName}"</span></p>
+                <AudioPlayer audioUrl={audioUrl} />
               </div>
 
               {/* Created and Edited By Info */}
@@ -184,6 +196,21 @@ const SubjectPage = () => {
           </div>
         )}
       </div>
+      {user && (
+        <div className="mt-6">
+          <button
+            onClick={handleMarkAsDone}
+            disabled={isMarkingDone}
+            className={`px-4 py-2 text-sm font-semibold rounded-full border transition w-full text-center ${
+              isSubjectDone
+                ? 'bg-green-500/20 hover:bg-green-500/30 border-green-300 text-green-900'
+                : 'bg-indigo-100 hover:bg-indigo-200 border-indigo-300 text-indigo-700'
+            }`}
+          >
+            {isMarkingDone ? 'מעבד...' : isSubjectDone ? '✓ הושלם' : 'סמן כהושלם'}
+          </button>
+        </div>
+      )}
 
       {/* 🧩 Edit Modal */}
       <EditSubjectModal
