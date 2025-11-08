@@ -8,9 +8,12 @@ const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880, // 5MB
   uploadPath: process.env.UPLOAD_PATH || './uploads',
-  bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS) || 12,
+  bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS) || 6,
   rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000, // 15 minutes
-  rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100
+  rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  corsOrigins: process.env.CORS_ORIGINS 
+    ? process.env.CORS_ORIGINS.split(',').map(origin => origin.trim())
+    : '*'
 };
 
 export default config;
